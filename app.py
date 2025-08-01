@@ -441,4 +441,4 @@ if __name__ == '__main__':
     print(f"📁 Templates 폴더: {app.template_folder}")
     print("=" * 60)
 
-    app.run(debug=True, host='localhost', port=5000)
+    app.run()
