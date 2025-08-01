@@ -1,0 +1,1610 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎤 SWING AI Voice Studio</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            /* Neumorphism 색상 팔레트 */
+            --primary: #4f46e5;
+            --secondary: #6366f1;
+            --accent: #8b5cf6;
+            --accent-light: #a78bfa;
+            --openai: #10b981;
+            --openai-dark: #059669;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --error: #ef4444;
+
+            /* Neumorphism 배경 및 표면 */
+            --background: #e0e7ff;
+            --surface: #e0e7ff;
+            --surface-light: #f1f5f9;
+            --surface-dark: #cbd5e1;
+
+            /* 텍스트 색상 */
+            --text: #1e293b;
+            --text-secondary: #475569;
+            --text-muted: #64748b;
+
+            /* Neumorphism 그림자 */
+            --shadow-light: rgba(255, 255, 255, 0.7);
+            --shadow-dark: rgba(148, 163, 184, 0.4);
+            --shadow-inset-light: rgba(255, 255, 255, 0.9);
+            --shadow-inset-dark: rgba(148, 163, 184, 0.3);
+
+            /* 기본 설정 */
+            --border-radius: 20px;
+            --border-radius-large: 30px;
+            --border-radius-small: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #e0e7ff 0%, #f1f5f9 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--text);
+            line-height: 1.6;
+            font-size: 16px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        /* Neumorphism 카드 기본 스타일 */
+        .neumorphism-card {
+            background: var(--surface);
+            border-radius: var(--border-radius);
+            box-shadow:
+                    12px 12px 24px var(--shadow-dark),
+                    -12px -12px 24px var(--shadow-light);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .neumorphism-card:hover {
+            transform: translateY(-2px);
+            box-shadow:
+                    16px 16px 32px var(--shadow-dark),
+                    -16px -16px 32px var(--shadow-light);
+        }
+
+        /* Neumorphism 인셋 스타일 */
+        .neumorphism-inset {
+            background: var(--surface);
+            border-radius: var(--border-radius-small);
+            box-shadow:
+                    inset 6px 6px 12px var(--shadow-inset-dark),
+                    inset -6px -6px 12px var(--shadow-inset-light);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        /* 헤더 */
+        .header {
+            background: var(--surface);
+            border-radius: var(--border-radius-large);
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow:
+                    20px 20px 40px var(--shadow-dark),
+                    -20px -20px 40px var(--shadow-light);
+        }
+
+        .header h1 {
+            font-size: 3.5em;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 15px;
+            letter-spacing: -0.02em;
+            text-shadow: 2px 2px 4px rgba(148, 163, 184, 0.3);
+        }
+
+        .header p {
+            font-size: 1.4em;
+            font-weight: 400;
+            color: var(--text-secondary);
+            margin-bottom: 25px;
+        }
+
+        .header-stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .stat-item {
+            background: var(--surface);
+            padding: 20px 25px;
+            border-radius: var(--border-radius);
+            text-align: center;
+            min-width: 120px;
+            box-shadow:
+                    8px 8px 16px var(--shadow-dark),
+                    -8px -8px 16px var(--shadow-light);
+            transition: all 0.3s ease;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-1px);
+            box-shadow:
+                    10px 10px 20px var(--shadow-dark),
+                    -10px -10px 20px var(--shadow-light);
+        }
+
+        .stat-number {
+            font-size: 2.2em;
+            font-weight: 700;
+            color: var(--accent);
+            display: block;
+            text-shadow: 1px 1px 2px rgba(139, 92, 246, 0.3);
+        }
+
+        .stat-label {
+            font-size: 1em;
+            color: var(--text-muted);
+            margin-top: 5px;
+        }
+
+        /* 메인 폼 */
+        .form-container {
+            background: var(--surface);
+            border-radius: var(--border-radius-large);
+            padding: 40px;
+            box-shadow:
+                    20px 20px 40px var(--shadow-dark),
+                    -20px -20px 40px var(--shadow-light);
+        }
+
+        .form-group {
+            margin-bottom: 30px;
+        }
+
+        .form-group label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            font-size: 1.2em;
+            margin-bottom: 12px;
+            color: var(--text);
+        }
+
+        .form-group label i {
+            color: var(--accent-light);
+            font-size: 1.2em;
+            text-shadow: 1px 1px 2px rgba(167, 139, 250, 0.3);
+        }
+
+        /* 텍스트 에어리어 */
+        .text-input {
+            width: 100%;
+            min-height: 140px;
+            padding: 20px;
+            background: var(--surface);
+            border: none;
+            border-radius: var(--border-radius);
+            color: var(--text);
+            font-size: 17px;
+            font-family: inherit;
+            resize: vertical;
+            transition: all 0.3s ease;
+            box-shadow:
+                    inset 8px 8px 16px var(--shadow-inset-dark),
+                    inset -8px -8px 16px var(--shadow-inset-light);
+        }
+
+        .text-input:focus {
+            outline: none;
+            box-shadow:
+                    inset 10px 10px 20px var(--shadow-inset-dark),
+                    inset -10px -10px 20px var(--shadow-inset-light),
+                    0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .text-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .char-counter {
+            text-align: right;
+            font-size: 1em;
+            color: var(--text-muted);
+            margin-top: 8px;
+        }
+
+        /* 옵션 그리드 */
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .option-card {
+            background: var(--surface);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            transition: all 0.3s ease;
+            box-shadow:
+                    12px 12px 24px var(--shadow-dark),
+                    -12px -12px 24px var(--shadow-light);
+        }
+
+        .option-card:hover {
+            transform: translateY(-1px);
+            box-shadow:
+                    16px 16px 32px var(--shadow-dark),
+                    -16px -16px 32px var(--shadow-light);
+        }
+
+        .custom-select {
+            width: 100%;
+            padding: 15px 20px;
+            background: var(--surface);
+            border: none;
+            border-radius: var(--border-radius-small);
+            color: var(--text);
+            font-size: 17px;
+            transition: all 0.3s ease;
+            box-shadow:
+                    inset 6px 6px 12px var(--shadow-inset-dark),
+                    inset -6px -6px 12px var(--shadow-inset-light);
+        }
+
+        .custom-select:focus {
+            outline: none;
+            box-shadow:
+                    inset 8px 8px 16px var(--shadow-inset-dark),
+                    inset -8px -8px 16px var(--shadow-inset-light),
+                    0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .custom-select option {
+            background: var(--surface);
+            color: var(--text);
+        }
+
+        /* 체크박스 스타일 */
+        .service-selector {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .service-item {
+            position: relative;
+            flex: 1;
+            min-width: 180px;
+        }
+
+        .service-checkbox {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .service-label {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 20px;
+            background: var(--surface);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            font-size: 1.05em;
+            box-shadow:
+                    8px 8px 16px var(--shadow-dark),
+                    -8px -8px 16px var(--shadow-light);
+        }
+
+        .service-label:hover {
+            transform: translateY(-1px);
+            box-shadow:
+                    12px 12px 24px var(--shadow-dark),
+                    -12px -12px 24px var(--shadow-light);
+        }
+
+        .service-checkbox:checked + .service-label {
+            box-shadow:
+                    inset 6px 6px 12px var(--shadow-inset-dark),
+                    inset -6px -6px 12px var(--shadow-inset-light);
+            background: linear-gradient(145deg, #d1d5db, #e5e7eb);
+        }
+
+        /* OpenAI 전용 스타일 */
+        .service-checkbox:checked + .service-label.openai-label {
+            background: linear-gradient(145deg, #d1fae5, #ecfdf5);
+            box-shadow:
+                    inset 6px 6px 12px rgba(16, 185, 129, 0.2),
+                    inset -6px -6px 12px rgba(255, 255, 255, 0.9);
+        }
+
+        .service-icon {
+            font-size: 1.4em;
+            color: var(--accent-light);
+            text-shadow: 1px 1px 2px rgba(167, 139, 250, 0.3);
+        }
+
+        .openai-icon {
+            color: var(--openai) !important;
+            text-shadow: 1px 1px 2px rgba(16, 185, 129, 0.3);
+        }
+
+        /* 설정 패널 */
+        .settings-panel {
+            background: var(--surface);
+            border-radius: var(--border-radius);
+            margin-top: 20px;
+            overflow: hidden;
+            box-shadow:
+                    12px 12px 24px var(--shadow-dark),
+                    -12px -12px 24px var(--shadow-light);
+        }
+
+        .settings-header {
+            background: linear-gradient(145deg, #e2e8f0, #f8fafc);
+            padding: 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        .settings-header:hover {
+            background: linear-gradient(145deg, #cbd5e1, #e2e8f0);
+        }
+
+        .settings-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+            font-size: 1.2em;
+            color: var(--text);
+        }
+
+        .toggle-icon {
+            font-size: 1.1em;
+            transition: transform 0.3s ease;
+            color: var(--accent-light);
+            text-shadow: 1px 1px 2px rgba(167, 139, 250, 0.3);
+        }
+
+        .toggle-icon.active {
+            transform: rotate(180deg);
+        }
+
+        .settings-content {
+            padding: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+
+        .settings-content.active {
+            padding: 25px;
+            max-height: 1000px;
+        }
+
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .setting-item {
+            background: var(--surface);
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow:
+                    6px 6px 12px var(--shadow-dark),
+                    -6px -6px 12px var(--shadow-light);
+            transition: all 0.3s ease;
+        }
+
+        .setting-item:hover {
+            transform: translateY(-1px);
+            box-shadow:
+                    8px 8px 16px var(--shadow-dark),
+                    -8px -8px 16px var(--shadow-light);
+        }
+
+        .setting-item label {
+            font-size: 1.05em;
+            font-weight: 500;
+            color: var(--text);
+            margin-bottom: 10px;
+        }
+
+        .setting-description {
+            font-size: 0.95em;
+            color: var(--text-muted);
+            margin-top: 8px;
+            line-height: 1.4;
+        }
+
+        /* 슬라이더 스타일 */
+        .range-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin: 10px 0;
+        }
+
+        .custom-range {
+            flex: 1;
+            height: 8px;
+            background: var(--surface);
+            border-radius: 4px;
+            outline: none;
+            appearance: none;
+            box-shadow:
+                    inset 3px 3px 6px var(--shadow-inset-dark),
+                    inset -3px -3px 6px var(--shadow-inset-light);
+        }
+
+        .custom-range::-webkit-slider-thumb {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(145deg, #f8fafc, #e2e8f0);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow:
+                    4px 4px 8px var(--shadow-dark),
+                    -4px -4px 8px var(--shadow-light);
+        }
+
+        .custom-range::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+            box-shadow:
+                    6px 6px 12px var(--shadow-dark),
+                    -6px -6px 12px var(--shadow-light);
+        }
+
+        .custom-range::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(145deg, #f8fafc, #e2e8f0);
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+            box-shadow:
+                    4px 4px 8px var(--shadow-dark),
+                    -4px -4px 8px var(--shadow-light);
+        }
+
+        .range-value {
+            min-width: 60px;
+            text-align: center;
+            font-weight: 600;
+            color: var(--accent);
+            font-size: 1em;
+            background: var(--surface);
+            padding: 8px 12px;
+            border-radius: var(--border-radius-small);
+            box-shadow:
+                    4px 4px 8px var(--shadow-dark),
+                    -4px -4px 8px var(--shadow-light);
+        }
+
+        /* 생성 버튼 */
+        .generate-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(145deg, #4f46e5, #6366f1);
+            border: none;
+            border-radius: var(--border-radius);
+            color: white;
+            font-size: 1.3em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow:
+                    12px 12px 24px var(--shadow-dark),
+                    -12px -12px 24px var(--shadow-light);
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow:
+                    16px 16px 32px var(--shadow-dark),
+                    -16px -16px 32px var(--shadow-light);
+        }
+
+        .generate-btn:active {
+            transform: translateY(0px);
+            box-shadow:
+                    inset 6px 6px 12px rgba(79, 70, 229, 0.3),
+                    inset -6px -6px 12px rgba(255, 255, 255, 0.1);
+        }
+
+        .generate-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* 스피너 */
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 결과 섹션 */
+        .results {
+            margin-top: 40px;
+            padding: 30px;
+            background: var(--surface);
+            border-radius: var(--border-radius-large);
+            box-shadow:
+                    20px 20px 40px var(--shadow-dark),
+                    -20px -20px 40px var(--shadow-light);
+        }
+
+        .results h3 {
+            font-size: 2em;
+            font-weight: 700;
+            margin-bottom: 25px;
+            text-align: center;
+            color: var(--text);
+            text-shadow: 2px 2px 4px rgba(148, 163, 184, 0.3);
+        }
+
+        .result-item {
+            background: var(--surface);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            box-shadow:
+                    8px 8px 16px var(--shadow-dark),
+                    -8px -8px 16px var(--shadow-light);
+        }
+
+        .result-item:hover {
+            transform: translateY(-1px);
+            box-shadow:
+                    12px 12px 24px var(--shadow-dark),
+                    -12px -12px 24px var(--shadow-light);
+        }
+
+        .service-tag {
+            background: linear-gradient(145deg, #8b5cf6, #a78bfa);
+            color: white;
+            padding: 10px 18px;
+            border-radius: 20px;
+            font-size: 1em;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 15px;
+            box-shadow:
+                    4px 4px 8px rgba(139, 92, 246, 0.3),
+                    -2px -2px 4px rgba(255, 255, 255, 0.1);
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .service-tag.openai-tag {
+            background: linear-gradient(145deg, #10b981, #34d399);
+            box-shadow:
+                    4px 4px 8px rgba(16, 185, 129, 0.3),
+                    -2px -2px 4px rgba(255, 255, 255, 0.1);
+        }
+
+        .audio-player {
+            width: 100%;
+            margin: 15px 0;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            filter: drop-shadow(4px 4px 8px var(--shadow-dark));
+        }
+
+        .control-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            padding: 14px 22px;
+            border: none;
+            border-radius: var(--border-radius-small);
+            font-size: 1em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow:
+                    6px 6px 12px var(--shadow-dark),
+                    -6px -6px 12px var(--shadow-light);
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .control-btn:hover {
+            transform: translateY(-1px);
+            box-shadow:
+                    8px 8px 16px var(--shadow-dark),
+                    -8px -8px 16px var(--shadow-light);
+        }
+
+        .control-btn:active {
+            transform: translateY(0px);
+            box-shadow:
+                    inset 3px 3px 6px var(--shadow-inset-dark),
+                    inset -3px -3px 6px var(--shadow-inset-light);
+        }
+
+        .download-btn {
+            background: linear-gradient(145deg, #22c55e, #16a34a);
+            color: white;
+        }
+
+        .play-btn {
+            background: linear-gradient(145deg, #f59e0b, #d97706);
+            color: white;
+        }
+
+        .cleanup-btn {
+            background: linear-gradient(145deg, #ef4444, #dc2626);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow:
+                    8px 8px 16px var(--shadow-dark),
+                    -8px -8px 16px var(--shadow-light);
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .cleanup-btn:hover {
+            transform: translateY(-1px);
+            box-shadow:
+                    12px 12px 24px var(--shadow-dark),
+                    -12px -12px 24px var(--shadow-light);
+        }
+
+        /* 서비스 그룹 헤더 */
+        .service-group {
+            margin-bottom: 30px;
+        }
+
+        .service-group-header {
+            background: var(--surface);
+            border-radius: var(--border-radius);
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            box-shadow:
+                    8px 8px 16px var(--shadow-dark),
+                    -8px -8px 16px var(--shadow-light);
+        }
+
+        .service-group-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.3em;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .service-group-count {
+            background: linear-gradient(145deg, #8b5cf6, #a78bfa);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            font-weight: 500;
+            margin-left: auto;
+            box-shadow:
+                    3px 3px 6px rgba(139, 92, 246, 0.3),
+                    -1px -1px 2px rgba(255, 255, 255, 0.1);
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .service-group-count.openai-count {
+            background: linear-gradient(145deg, #10b981, #34d399);
+            box-shadow:
+                    3px 3px 6px rgba(16, 185, 129, 0.3),
+                    -1px -1px 2px rgba(255, 255, 255, 0.1);
+        }
+
+        .message {
+            padding: 16px 20px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow:
+                    6px 6px 12px var(--shadow-dark),
+                    -6px -6px 12px var(--shadow-light);
+        }
+
+        .success-message {
+            background: linear-gradient(145deg, #dcfce7, #f0fdf4);
+            color: var(--success);
+            border-left: 4px solid var(--success);
+        }
+
+        .error-message {
+            background: linear-gradient(145deg, #fecaca, #fee2e2);
+            color: var(--error);
+            border-left: 4px solid var(--error);
+        }
+
+        .white-bg-black-text {
+            background: linear-gradient(145deg, #ffffff, #f8fafc);
+            color: var(--text);
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: 900;
+            box-shadow:
+                    2px 2px 4px var(--shadow-dark),
+                    -2px -2px 4px var(--shadow-light);
+        }
+
+        /* 반응형 디자인 */
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                padding: 0;
+            }
+
+            .header h1 {
+                font-size: 2.8em;
+            }
+
+            .header p {
+                font-size: 1.2em;
+            }
+
+            .header-stats {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .form-container {
+                padding: 25px;
+            }
+
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .service-selector {
+                flex-direction: column;
+            }
+
+            .settings-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .control-buttons {
+                justify-content: center;
+            }
+        }
+
+        /* 부드러운 페이드인 효과 */
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 미세한 애니메이션 효과 */
+        @keyframes softPulse {
+            0%, 100% {
+                box-shadow:
+                        12px 12px 24px var(--shadow-dark),
+                        -12px -12px 24px var(--shadow-light);
+            }
+            50% {
+                box-shadow:
+                        16px 16px 32px var(--shadow-dark),
+                        -16px -16px 32px var(--shadow-light);
+            }
+        }
+
+        .generate-btn:not(:disabled):not(:active) {
+            animation: softPulse 3s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- 헤더 -->
+    <div class="header neumorphism-card">
+        <h1><i class="fas fa-microphone-alt"></i> <span class="white-bg-black-text">SWING</span> AI Voice Studio</h1>
+        <p>더스윙 AI 음성 생성 스튜디오 + OpenAI TTS 🚀</p>
+        <div class="header-stats">
+            <div class="stat-item">
+                <span class="stat-number" id="totalGenerated">0</span>
+                <div class="stat-label">생성된 음성</div>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">15</span>
+                <div class="stat-label">음성 옵션</div>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">∞</span>
+                <div class="stat-label">가능성</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 메인 폼 -->
+    <div class="form-container">
+        <form id="ttsForm">
+            <div class="form-group">
+                <label for="text">
+                    <i class="fas fa-edit"></i>
+                    변환할 텍스트
+                </label>
+                <textarea id="text"
+                          class="text-input"
+                          placeholder="여기에 음성으로 변환하고 싶은 텍스트를 입력하세요..."
+                          required
+                          maxlength="4096"></textarea>
+                <div class="char-counter">
+                    <span id="charCount">0</span> / 4096 characters
+                </div>
+            </div>
+
+            <div class="options-grid">
+                <div class="option-card">
+                    <label for="count">
+                        <i class="fas fa-copy"></i>
+                        생성 개수
+                    </label>
+                    <select id="count" class="custom-select">
+                        <option value="1">1개 - 빠른 테스트</option>
+                        <option value="2">2개 - 비교해보기</option>
+                        <option value="3">3개 - 다양한 옵션</option>
+                        <option value="4">4개 - 완벽한 선택</option>
+                        <option value="5">5개 - 모든 가능성</option>
+                        <option value="6">6개 - 모든 음성</option>
+                        <option value="10">10개 - 대량 테스트</option>
+                        <option value="20">20개 - 프로덕션 준비</option>
+                        <option value="30">30개 - 대규모 생성</option>
+                    </select>
+                </div>
+
+                <div class="option-card">
+                    <label>
+                        <i class="fas fa-robot"></i>
+                        AI 서비스 선택
+                    </label>
+                    <div class="service-selector">
+                        <div class="service-item">
+                            <input type="checkbox" id="google" value="google" class="service-checkbox" checked onchange="toggleSettings()">
+                            <label for="google" class="service-label">
+                                <i class="fab fa-google service-icon"></i>
+                                <div>
+                                    <div>Google TTS</div>
+                                    <small style="opacity: 0.8;">무료 • 다국어</small>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="service-item">
+                            <input type="checkbox" id="elevenlabs" value="elevenlabs" class="service-checkbox" onchange="toggleSettings()">
+                            <label for="elevenlabs" class="service-label">
+                                <i class="fas fa-brain service-icon"></i>
+                                <div>
+                                    <div>ElevenLabs</div>
+                                    <small style="opacity: 0.8;">프리미엄 • AI 음성</small>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="service-item">
+                            <input type="checkbox" id="openai" value="openai" class="service-checkbox" onchange="toggleSettings()">
+                            <label for="openai" class="service-label openai-label">
+                                <i class="fas fa-robot openai-icon service-icon"></i>
+                                <div>
+                                    <div>OpenAI TTS 🚀</div>
+                                    <small style="opacity: 0.8;">GPT • 초고품질</small>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Google TTS 설정 패널 -->
+            <div id="googleSettings" class="settings-panel">
+                <div class="settings-header" onclick="togglePanel('googleSettings')">
+                    <div class="settings-title">
+                        <i class="fab fa-google"></i>
+                        Google TTS 설정
+                    </div>
+                    <i class="fas fa-chevron-down toggle-icon"></i>
+                </div>
+                <div class="settings-content">
+                    <div class="settings-grid">
+                        <div class="setting-item">
+                            <label for="googleLang">
+                                <i class="fas fa-globe"></i>
+                                언어 선택
+                            </label>
+                            <select id="googleLang" class="custom-select">
+                                <option value="ko">🇰🇷 한국어</option>
+                                <option value="en">🇺🇸 English</option>
+                                <option value="ja">🇯🇵 日本語</option>
+                                <option value="zh">🇨🇳 中文</option>
+                                <option value="es">🇪🇸 Español</option>
+                                <option value="fr">🇫🇷 Français</option>
+                                <option value="de">🇩🇪 Deutsch</option>
+                                <option value="it">🇮🇹 Italiano</option>
+                            </select>
+                            <div class="setting-description">텍스트 언어에 맞는 언어를 선택하세요</div>
+                        </div>
+                        <div class="setting-item">
+                            <label for="googleSlow">
+                                <i class="fas fa-tachometer-alt"></i>
+                                읽기 속도
+                            </label>
+                            <select id="googleSlow" class="custom-select">
+                                <option value="false">⚡ 보통 속도</option>
+                                <option value="true">🐌 느린 속도</option>
+                            </select>
+                            <div class="setting-description">느린 속도는 언어 학습에 유용합니다</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ElevenLabs 설정 패널 -->
+            <div id="elevenlabsSettings" class="settings-panel" style="display: none;">
+                <div class="settings-header" onclick="togglePanel('elevenlabsSettings')">
+                    <div class="settings-title">
+                        <i class="fas fa-brain"></i>
+                        ElevenLabs 고급 설정
+                    </div>
+                    <i class="fas fa-chevron-down toggle-icon"></i>
+                </div>
+                <div class="settings-content">
+                    <div class="settings-grid">
+                        <div class="setting-item">
+                            <label for="voice">
+                                <i class="fas fa-user-friends"></i>
+                                음성 캐릭터
+                            </label>
+                            <select id="voice" class="custom-select">
+                                <option value="21m00Tcm4TlvDq8ikWAM">👩 Rachel - 따뜻한 여성</option>
+                                <option value="AZnzlk1XvdvUeBnXmlld">👩 Domi - 자신감 있는 여성</option>
+                                <option value="EXAVITQu4vr4xnSDxMaL">👩 Bella - 부드러운 여성</option>
+                                <option value="ErXwobaYiN019PkySvjV">👨 Antoni - 감성적인 남성</option>
+                                <option value="MF3mGyEYCl7XYWbV9V6O">👩 Elli - 활발한 여성</option>
+                                <option value="TxGEqnHWrfWFTfGW9XjX">👨 Josh - 친근한 남성</option>
+                                <option value="VR6AewLTigWG4xSOukaG">👨 Arnold - 강렬한 남성</option>
+                                <option value="pNInz6obpgDQGcFmaJgB">👨 Adam - 뉴스 앵커풍</option>
+                                <option value="yoZ06aMxZJJ28mfd3POQ">👨 Sam - 내레이션풍</option>
+                            </select>
+                        </div>
+
+                        <div class="setting-item">
+                            <label for="model">
+                                <i class="fas fa-cogs"></i>
+                                AI 모델
+                            </label>
+                            <select id="model" class="custom-select">
+                                <option value="eleven_monolingual_v1">English v1 (안정적)</option>
+                                <option value="eleven_multilingual_v1">Multilingual v1</option>
+                                <option value="eleven_multilingual_v2" selected>Multilingual v2 (최신)</option>
+                                <option value="eleven_turbo_v2">Turbo v2 (고속)</option>
+                            </select>
+                        </div>
+
+                        <div class="setting-item">
+                            <label for="stability">
+                                <i class="fas fa-balance-scale"></i>
+                                Stability (안정성)
+                            </label>
+                            <div class="range-container">
+                                <input type="range" id="stability" class="custom-range" min="0" max="1" step="0.1" value="0.5"
+                                       oninput="updateRangeValue('stability', 'stabilityValue')">
+                                <div class="range-value" id="stabilityValue">0.5</div>
+                            </div>
+                            <div class="setting-description">낮음 = 더 표현력, 높음 = 더 안정적</div>
+                        </div>
+
+                        <div class="setting-item">
+                            <label for="similarity">
+                                <i class="fas fa-fingerprint"></i>
+                                Similarity (유사성)
+                            </label>
+                            <div class="range-container">
+                                <input type="range" id="similarity" class="custom-range" min="0" max="1" step="0.1" value="0.5"
+                                       oninput="updateRangeValue('similarity', 'similarityValue')">
+                                <div class="range-value" id="similarityValue">0.5</div>
+                            </div>
+                            <div class="setting-description">원본 음성 특성 유지 정도</div>
+                        </div>
+
+                        <div class="setting-item">
+                            <label for="style">
+                                <i class="fas fa-theater-masks"></i>
+                                Style (감정 표현)
+                            </label>
+                            <div class="range-container">
+                                <input type="range" id="style" class="custom-range" min="0" max="1" step="0.1" value="0.0"
+                                       oninput="updateRangeValue('style', 'styleValue')">
+                                <div class="range-value" id="styleValue">0.0</div>
+                            </div>
+                            <div class="setting-description">0 = 자연스럽게, 1 = 극도로 감정적</div>
+                        </div>
+
+                        <div class="setting-item">
+                            <label style="margin-bottom: 15px;">
+                                <i class="fas fa-volume-up"></i>
+                                추가 옵션
+                            </label>
+                            <div class="service-item">
+                                <input type="checkbox" id="speakerBoost" class="service-checkbox" checked>
+                                <label for="speakerBoost" class="service-label">
+                                    <i class="fas fa-magic service-icon"></i>
+                                    <div>
+                                        <div>Speaker Boost</div>
+                                        <small style="opacity: 0.8;">음성 품질 향상</small>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 🚀 OpenAI TTS 설정 패널 (NEW!) -->
+            <div id="openaiSettings" class="settings-panel" style="display: none;">
+                <div class="settings-header" onclick="togglePanel('openaiSettings')">
+                    <div class="settings-title">
+                        <i class="fas fa-robot openai-icon"></i>
+                        OpenAI TTS 설정 🚀
+                    </div>
+                    <i class="fas fa-chevron-down toggle-icon"></i>
+                </div>
+                <div class="settings-content">
+                    <div class="settings-grid">
+                        <div class="setting-item">
+                            <label for="openaiVoice">
+                                <i class="fas fa-user-astronaut"></i>
+                                AI 음성 선택
+                            </label>
+                            <select id="openaiVoice" class="custom-select">
+                                <option value="alloy" selected>🎭 Alloy - 균형 잡힌 중성적</option>
+                                <option value="echo">🎵 Echo - 남성적이고 깊은</option>
+                                <option value="fable">💫 Fable - 따뜻하고 친근한</option>
+                                <option value="onyx">⚡ Onyx - 강렬하고 카리스마</option>
+                                <option value="nova">✨ Nova - 활기차고 현대적</option>
+                                <option value="shimmer">🌟 Shimmer - 부드럽고 우아한</option>
+                            </select>
+                            <div class="setting-description">OpenAI GPT가 만든 최고 품질의 AI 음성들</div>
+                        </div>
+
+                        <div class="setting-item">
+                            <label for="openaiModel">
+                                <i class="fas fa-brain"></i>
+                                AI 모델
+                            </label>
+                            <select id="openaiModel" class="custom-select">
+                                <option value="tts-1" selected>⚡ TTS-1 (빠름)</option>
+                                <option value="tts-1-hd">💎 TTS-1-HD (고품질)</option>
+                            </select>
+                            <div class="setting-description">TTS-1은 빠름, TTS-1-HD는 최고 품질</div>
+                        </div>
+
+                        <div class="setting-item">
+                            <label for="openaiSpeed">
+                                <i class="fas fa-tachometer-alt"></i>
+                                음성 속도
+                            </label>
+                            <div class="range-container">
+                                <input type="range" id="openaiSpeed" class="custom-range" min="0.25" max="4.0" step="0.25" value="1.0"
+                                       oninput="updateRangeValue('openaiSpeed', 'openaiSpeedValue')">
+                                <div class="range-value" id="openaiSpeedValue">1.0</div>
+                            </div>
+                            <div class="setting-description">0.25x = 매우 느림, 1.0x = 보통, 4.0x = 매우 빠름</div>
+                        </div>
+
+                        <div class="setting-item">
+                            <label for="openaiFormat">
+                                <i class="fas fa-file-audio"></i>
+                                오디오 포맷
+                            </label>
+                            <select id="openaiFormat" class="custom-select">
+                                <option value="mp3" selected>🎵 MP3 (호환성 최고)</option>
+                                <option value="opus">🎼 OPUS (스트리밍 최적화)</option>
+                                <option value="aac">🍎 AAC (Apple 최적화)</option>
+                                <option value="flac">💎 FLAC (무손실 압축)</option>
+                            </select>
+                            <div class="setting-description">용도에 맞는 오디오 포맷을 선택하세요</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="generate-btn" id="generateBtn">
+                <i class="fas fa-magic"></i>
+                <span>AI 음성 생성하기</span>
+            </button>
+        </form>
+    </div>
+
+    <!-- 결과 표시 영역 -->
+    <div id="results" class="results" style="display: none;">
+        <h3><i class="fas fa-headphones"></i> 생성된 음성 파일들</h3>
+        <div id="resultsList"></div>
+        <button class="cleanup-btn" onclick="cleanupFiles()" id="cleanupBtn" style="display: none;">
+            <i class="fas fa-trash-alt"></i>
+            모든 파일 정리
+        </button>
+    </div>
+</div>
+
+<script>
+    // 캐릭터 카운터 업데이트
+    function updateCharCounter() {
+        const textArea = document.getElementById('text');
+        const charCount = document.getElementById('charCount');
+
+        textArea.addEventListener('input', () => {
+            charCount.textContent = textArea.value.length;
+
+            if (textArea.value.length > 3500) {
+                charCount.style.color = 'var(--warning)';
+            } else if (textArea.value.length > 4000) {
+                charCount.style.color = 'var(--error)';
+            } else {
+                charCount.style.color = 'var(--accent)';
+            }
+        });
+    }
+
+    // 통계 업데이트
+    function updateStats() {
+        const totalGenerated = localStorage.getItem('totalGenerated') || 0;
+        document.getElementById('totalGenerated').textContent = totalGenerated;
+    }
+
+    // DOM 로드 완료 후 실행
+    document.addEventListener('DOMContentLoaded', function() {
+        updateCharCounter();
+        updateStats();
+
+        const form = document.getElementById('ttsForm');
+
+        if (!form) {
+            console.error('폼을 찾을 수 없습니다!');
+            return;
+        }
+
+        // 폼 제출 이벤트 처리
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const text = document.getElementById('text').value.trim();
+            const globalCount = parseInt(document.getElementById('count').value);
+            const services = [];
+
+            // 서비스별 설정 수집
+            const settings = {};
+
+            if (document.getElementById('google').checked) {
+                services.push('google');
+                settings.google = {
+                    language: document.getElementById('googleLang').value,
+                    slow: document.getElementById('googleSlow').value === 'true',
+                    count: 1
+                };
+            }
+
+            if (document.getElementById('elevenlabs').checked) {
+                services.push('elevenlabs');
+                settings.elevenlabs = {
+                    voice_id: document.getElementById('voice').value,
+                    model_id: document.getElementById('model').value,
+                    stability: parseFloat(document.getElementById('stability').value),
+                    similarity_boost: parseFloat(document.getElementById('similarity').value),
+                    style: parseFloat(document.getElementById('style').value),
+                    use_speaker_boost: document.getElementById('speakerBoost').checked,
+                    count: globalCount
+                };
+            }
+
+            // 🚀 OpenAI TTS 설정 추가 (NEW!)
+            if (document.getElementById('openai').checked) {
+                services.push('openai');
+                settings.openai = {
+                    voice: document.getElementById('openaiVoice').value,
+                    model: document.getElementById('openaiModel').value,
+                    speed: parseFloat(document.getElementById('openaiSpeed').value),
+                    response_format: document.getElementById('openaiFormat').value,
+                    count: globalCount
+                };
+            }
+
+            // 입력 검증
+            if (!text) {
+                showMessage('텍스트를 입력해주세요', 'error');
+                return;
+            }
+
+            if (services.length === 0) {
+                showMessage('AI 서비스를 하나 이상 선택해주세요', 'error');
+                return;
+            }
+
+            if (text.length > 4096) {
+                showMessage('텍스트가 너무 깁니다. 4096자 이하로 입력해주세요', 'error');
+                return;
+            }
+
+            const generateBtn = document.getElementById('generateBtn');
+            const resultsDiv = document.getElementById('results');
+
+            // 버튼 상태 변경
+            generateBtn.disabled = true;
+            generateBtn.innerHTML = '<div class="spinner"></div><span>AI 음성 생성 중...</span>';
+            if (resultsDiv) resultsDiv.style.display = 'none';
+
+            try {
+                const response = await fetch('/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ text, count: globalCount, services, settings })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    console.log('음성 생성 성공:', data);
+                    displayResults(data.results);
+
+                    // 통계 업데이트
+                    const currentTotal = parseInt(localStorage.getItem('totalGenerated') || 0);
+                    const successCount = data.results.filter(r => r.success).length;
+                    localStorage.setItem('totalGenerated', currentTotal + successCount);
+                    updateStats();
+                } else {
+                    showMessage(data.error || '오류가 발생했습니다', 'error');
+                }
+            } catch (error) {
+                console.error('네트워크 오류:', error);
+                showMessage('서버 연결에 실패했습니다', 'error');
+            } finally {
+                generateBtn.disabled = false;
+                generateBtn.innerHTML = '<i class="fas fa-magic"></i><span>AI 음성 생성하기</span>';
+            }
+        });
+
+        // 초기 설정 패널 표시
+        toggleSettings();
+    });
+
+    // 메시지 표시
+    function showMessage(message, type) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${type}-message fade-in`;
+        messageDiv.innerHTML = `
+                <i class="fas fa-${type === 'error' ? 'exclamation-triangle' : 'check-circle'}"></i>
+                ${message}
+            `;
+
+        document.querySelector('.form-container').appendChild(messageDiv);
+
+        setTimeout(() => {
+            messageDiv.remove();
+        }, 4000);
+    }
+
+    // 서비스 선택에 따른 설정 패널 표시/숨김
+    function toggleSettings() {
+        const googleChecked = document.getElementById('google').checked;
+        const elevenlabsChecked = document.getElementById('elevenlabs').checked;
+        const openaiChecked = document.getElementById('openai').checked;
+
+        document.getElementById('googleSettings').style.display = googleChecked ? 'block' : 'none';
+        document.getElementById('elevenlabsSettings').style.display = elevenlabsChecked ? 'block' : 'none';
+        document.getElementById('openaiSettings').style.display = openaiChecked ? 'block' : 'none';
+    }
+
+    // 설정 패널 접기/펼치기
+    function togglePanel(panelId) {
+        const panel = document.getElementById(panelId);
+        const content = panel.querySelector('.settings-content');
+        const icon = panel.querySelector('.toggle-icon');
+
+        content.classList.toggle('active');
+        icon.classList.toggle('active');
+    }
+
+    // 슬라이더 값 업데이트
+    function updateRangeValue(rangeId, valueId) {
+        const range = document.getElementById(rangeId);
+        const valueSpan = document.getElementById(valueId);
+        valueSpan.textContent = range.value;
+    }
+
+    // 결과 표시
+    function displayResults(results) {
+        const resultsDiv = document.getElementById('results');
+        const resultsListDiv = document.getElementById('resultsList');
+        const cleanupBtn = document.getElementById('cleanupBtn');
+
+        if (!resultsDiv || !resultsListDiv) {
+            console.error('결과 표시 요소를 찾을 수 없습니다!');
+            return;
+        }
+
+        resultsListDiv.innerHTML = '';
+        let totalSuccessCount = 0;
+
+        // 서비스별로 그룹핑
+        const groupedResults = {
+            google: results.filter(r => r.service && r.service.toLowerCase().includes('google')),
+            elevenlabs: results.filter(r => r.service && r.service.toLowerCase().includes('elevenlabs')),
+            openai: results.filter(r => r.service && r.service.toLowerCase().includes('openai'))  // 🚀 NEW!
+        };
+
+        // 성공 메시지 먼저 표시
+        const successCount = results.filter(r => r.success).length;
+        if (successCount > 0) {
+            const successMsg = document.createElement('div');
+            successMsg.className = 'message success-message';
+            successMsg.innerHTML = `
+                    <i class="fas fa-check-circle"></i>
+                    ${successCount}개의 AI 음성이 성공적으로 생성되었습니다
+                `;
+            resultsListDiv.appendChild(successMsg);
+            totalSuccessCount = successCount;
+        }
+
+        // Google TTS 그룹 표시
+        if (groupedResults.google.length > 0) {
+            const googleGroup = document.createElement('div');
+            googleGroup.className = 'service-group';
+
+            const googleSuccessCount = groupedResults.google.filter(r => r.success).length;
+
+            googleGroup.innerHTML = `
+                    <div class="service-group-header">
+                        <div class="service-group-title">
+                            <i class="fab fa-google" style="color: var(--accent);"></i>
+                            Google TTS
+                            <span class="service-group-count">${googleSuccessCount}/${groupedResults.google.length}</span>
+                        </div>
+                    </div>
+                    <div class="service-group-content"></div>
+                `;
+
+            const googleContent = googleGroup.querySelector('.service-group-content');
+
+            groupedResults.google.forEach((result, index) => {
+                const resultItem = createResultItem(result, index);
+                googleContent.appendChild(resultItem);
+            });
+
+            resultsListDiv.appendChild(googleGroup);
+        }
+
+        // ElevenLabs 그룹 표시
+        if (groupedResults.elevenlabs.length > 0) {
+            const elevenlabsGroup = document.createElement('div');
+            elevenlabsGroup.className = 'service-group';
+
+            const elevenlabsSuccessCount = groupedResults.elevenlabs.filter(r => r.success).length;
+
+            elevenlabsGroup.innerHTML = `
+                    <div class="service-group-header">
+                        <div class="service-group-title">
+                            <i class="fas fa-brain" style="color: var(--accent);"></i>
+                            ElevenLabs AI
+                            <span class="service-group-count">${elevenlabsSuccessCount}/${groupedResults.elevenlabs.length}</span>
+                        </div>
+                    </div>
+                    <div class="service-group-content"></div>
+                `;
+
+            const elevenlabsContent = elevenlabsGroup.querySelector('.service-group-content');
+
+            groupedResults.elevenlabs.forEach((result, index) => {
+                const resultItem = createResultItem(result, index);
+                elevenlabsContent.appendChild(resultItem);
+            });
+
+            resultsListDiv.appendChild(elevenlabsGroup);
+        }
+
+        // 🚀 OpenAI TTS 그룹 표시 (NEW!)
+        if (groupedResults.openai.length > 0) {
+            const openaiGroup = document.createElement('div');
+            openaiGroup.className = 'service-group';
+
+            const openaiSuccessCount = groupedResults.openai.filter(r => r.success).length;
+
+            openaiGroup.innerHTML = `
+                    <div class="service-group-header">
+                        <div class="service-group-title">
+                            <i class="fas fa-robot openai-icon" style="color: var(--openai);"></i>
+                            OpenAI TTS 🚀
+                            <span class="service-group-count openai-count">${openaiSuccessCount}/${groupedResults.openai.length}</span>
+                        </div>
+                    </div>
+                    <div class="service-group-content"></div>
+                `;
+
+            const openaiContent = openaiGroup.querySelector('.service-group-content');
+
+            groupedResults.openai.forEach((result, index) => {
+                const resultItem = createResultItem(result, index, true); // true = isOpenAI
+                openaiContent.appendChild(resultItem);
+            });
+
+            resultsListDiv.appendChild(openaiGroup);
+        }
+
+        resultsDiv.style.display = 'block';
+        resultsDiv.classList.add('fade-in');
+
+        // 정리 버튼 표시
+        if (cleanupBtn && totalSuccessCount > 0) {
+            cleanupBtn.style.display = 'flex';
+        }
+    }
+
+    // 개별 결과 아이템 생성
+    function createResultItem(result, index, isOpenAI = false) {
+        const resultItem = document.createElement('div');
+        resultItem.className = 'result-item';
+
+        if (result.success) {
+            const fileId = result.file_id;
+            const tagClass = isOpenAI ? 'openai-tag' : '';
+
+            resultItem.innerHTML = `
+                    <div style="margin-bottom: 20px;">
+                        <span class="service-tag ${tagClass}">
+                            <i class="fas fa-${isOpenAI ? 'robot' : 'robot'}"></i>
+                            ${result.service}
+                        </span>
+                    </div>
+                    <audio controls preload="metadata" class="audio-player">
+                        <source src="/play/${fileId}" type="audio/mpeg">
+                        브라우저가 오디오를 지원하지 않습니다.
+                    </audio>
+                    <div class="control-buttons">
+                        <button class="control-btn download-btn" onclick="downloadFile('${fileId}')">
+                            <i class="fas fa-download"></i>
+                            다운로드
+                        </button>
+                        <button class="control-btn play-btn" onclick="playAudio('${fileId}')">
+                            <i class="fas fa-external-link-alt"></i>
+                            새 창에서 재생
+                        </button>
+                    </div>
+                `;
+        } else {
+            resultItem.innerHTML = `
+                    <div class="message error-message">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>${result.service}</strong> 생성 실패: ${result.error}
+                    </div>
+                `;
+        }
+
+        return resultItem;
+    }
+
+    // 파일 다운로드
+    function downloadFile(fileId) {
+        try {
+            const link = document.createElement('a');
+            link.href = `/download/${fileId}`;
+            link.download = `ai_voice_${fileId}.mp3`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            showMessage('다운로드가 시작되었습니다', 'success');
+        } catch (error) {
+            console.error('다운로드 오류:', error);
+            showMessage('파일 다운로드 중 오류가 발생했습니다', 'error');
+        }
+    }
+
+    // 오디오 재생 (별도 창에서)
+    function playAudio(fileId) {
+        try {
+            const audioUrl = `/play/${fileId}`;
+            window.open(audioUrl, '_blank');
+        } catch (error) {
+            console.error('재생 오류:', error);
+            showMessage('오디오 재생 중 오류가 발생했습니다', 'error');
+        }
+    }
+
+    // 파일 정리
+    async function cleanupFiles() {
+        if (!confirm('모든 생성된 파일을 삭제하시겠습니까?')) {
+            return;
+        }
+
+        try {
+            const response = await fetch('/cleanup', { method: 'POST' });
+
+            if (!response.ok) {
+                throw new Error('서버 응답 오류');
+            }
+
+            const data = await response.json();
+            showMessage(data.message || '모든 파일이 정리되었습니다', 'success');
+
+            const resultsDiv = document.getElementById('results');
+            const cleanupBtn = document.getElementById('cleanupBtn');
+
+            if (resultsDiv) resultsDiv.style.display = 'none';
+            if (cleanupBtn) cleanupBtn.style.display = 'none';
+
+        } catch (error) {
+            console.error('파일 정리 오류:', error);
+            showMessage('파일 정리 중 오류가 발생했습니다', 'error');
+        }
+    }
+</script>
+</body>
+</html>
